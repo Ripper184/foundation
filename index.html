@@ -1,0 +1,125 @@
+<!doctype html>
+<html class="no-js" lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <link rel="stylesheet" href="css/foundation.css" />
+  <link rel="stylesheet" href="css/jquery-ui.css">
+  <script src="js/jquery-1.9.1.js"></script>
+  <script src="js/jquery-ui.js"></script>
+  <script src="js/foundation.min.js"></script>
+  <script language="javascript">
+    $.fn.classList = function() {return this.attr('class').split(/\s+/);};
+  </script>
+  <style>
+    .fullWidth {
+      width: 100%;
+      margin-left: auto;
+      margin-right: auto;
+      max-width: inherit;
+    }
+    .panel {
+      margin-bottom: 0.1em;
+      padding-top: 0;
+      padding-bottom: 0;
+    }
+    .mainPanel {
+      display: table-cell;
+      vertical-align: top;
+    }
+    .widget, .col{
+      width: 100;
+      background-color: grey;
+      margin:5px;
+    }
+  </style>
+</head>
+<body>
+  <div style=" display: table; width: 100%; ">
+    <div class="mainPanel" style="min-width:200px;">
+      <div><hr>Display<hr></div>
+      <div class="col col_1">1</div>
+      <div class="col col_1_1">1|1</div>
+      <div class="col col_2_1">2|1</div>
+      <div class="col col_1_2">1|2</div>
+      <div class="col col_1_1_1">1|1|1</div>
+      <div class="col col_2_1_1">2|1|1</div>
+      <div class="col col_1_2_1">1|2|1</div>
+      <div class="col col_1_1_2">1|1|2</div>
+      <div class="col col_1_2_3">1|2|3</div>
+      <div class="col col_1_3_2">1|3|2</div>
+      <div class="col col_2_1_3">2|1|3</div>
+      <div class="col col_2_3_1">2|3|1</div>
+      <div class="col col_3_1_2">3|1|2</div>
+      <div class="col col_3_2_1">3|2|1</div>
+      <div><hr>Widget<hr></div>
+      <div class="widget widget_w1">W1</div>
+      <div class="widget widget_w2">W2</div>
+    </div>
+    <div id="grid" class="mainPanel" style="background-color: aliceblue; width:100%">
+    </div>
+    <script>
+      $(document).ready(function () {
+        $( "#grid").foundation();
+        $(".widget, .col").draggable({
+          revert: "invalid",
+          helper: "clone",
+          zIndex: 1000
+        }).disableSelection();
+
+        $( "#grid" ).droppable({
+          accept: '.col',
+          activeClass: "ui-state-default",
+          hoverClass: "ui-state-hover",
+          drop: drop
+        });
+
+        dropInColumn($("#grid"));
+      });
+
+      function dropInColumn(el) {
+        el.find(".columns").droppable({
+          accept: '.widget, .col',
+          greedy: true,
+          activeClass: "ui-state-default",
+          hoverClass: "ui-state-hover",
+          drop: drop
+        });
+      }
+
+      function drop( event, ui ) {
+        var type = '',
+          el;
+        $.each(ui.draggable.classList(), function(index, item){
+          if (item.substr(0,4) === 'col_') {
+            el = $(createARow(item.substr(4).split('_')));
+          } else if (item.substr(0, 7) === 'widget_') {
+            type = item.substr(7);
+            el = $('<div>' + type + '</div>');
+          }
+        });
+
+        el.appendTo(this);
+        dropInColumn(el);
+      }
+
+      function createARow(cols) {
+        var html, nbCols;
+
+        html = '<div class="row fullWidth">';
+        nbCols = 0;
+        $.each(cols, function (index, col) {
+          nbCols += parseInt(col);
+        });
+        $.each(cols, function (index, col) {
+          var nbCol = col * 12 / nbCols;
+          html += '<div class="panel medium-' + nbCol + ' columns">' + col + ' columns (' + nbCol + ')</div>';
+        });
+        html += '</div>';
+
+        return html;
+      }
+    </script>
+  </div>
+</body>
+</html>
