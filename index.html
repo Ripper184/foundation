@@ -59,69 +59,65 @@
     <div id="grid" class="mainPanel" style="background-color: aliceblue; width:100%">
     </div>
     <script>
-      $(document).ready(function () {
-        $( "#grid").foundation();
-        $(".widget, .col").draggable({
+      function dragOption() {
+        return {
+          cursor: 'move',
           revert: "invalid",
-          helper: "clone",
+          helper: function() {
+            return $("<div>Obj to drop</div>");
+          },
+          start: function(event, ui) {
+            $(event.target).hide();
+          },
+          stop: function(event, ui) {
+            $(event.target).show();
+          },
           zIndex: 1000
-        }).disableSelection();
+        };
+      }
 
-        $( "#grid" ).droppable({
-          accept: '.col',
-          activeClass: "ui-state-default",
-          hoverClass: "ui-state-hover",
-          drop: drop
-        });
-
-        dragRow($("#grid"));
-        dropInColumn($("#grid"));
-      });
-
-      function dropInColumn(el) {
-        el.find(".columns").droppable({
-          accept: '.widget, .col',
+      function dropOption(accept) {
+        return {
+          accept: accept,
           greedy: true,
           activeClass: "ui-state-default",
           hoverClass: "ui-state-hover",
           drop: drop
-        });
+        };
       }
 
-      function dragRow(el) {
-        el.find(".row").draggable({
-          revert: "invalid",
-          helper: "clone",
-          zIndex: 1000
-        }).disableSelection();
+      $(document).ready(function () {
+        $( "#grid").foundation();
+        $(".col").draggable(dragOption()).disableSelection();
+        $(".widget").draggable(dragOption()).disableSelection();
+
+        $( "#grid" ).droppable(dropOption('.col, .row')).disableSelection();
+
+      });
+
+      function dropInColumn(el) {
+        el.find(".columns").droppable(dropOption('.widget, .col, .row'));
       }
 
-      function dragWidget(el) {
-        el.draggable({
-          revert: "invalid",
-          helper: "clone",
-          zIndex: 1000
-        }).disableSelection();
+      function drag(el) {
+        el.draggable(dragOption()).disableSelection();
       }
 
       function drop( event, ui ) {
         var type = '',
-          el = null;
+          el = ui.draggable;
         $.each(ui.draggable.classList(), function(index, item){
           if (item.substr(0,4) === 'col_') {
             el = $(createARow(item.substr(4).split('_')));
             dropInColumn(el);
-            dragRow(el);
+            drag(el);
           } else if (item.substr(0, 7) === 'widget_') {
             type = item.substr(7);
             el = $('<div class="widget">' + type + '</div>');
-            dragWidget(el);
+            drag(el);
           }
         });
 
-        if (el === null) {
-          el = ui.draggable;
-        }
         el.appendTo(this);
       }
 
